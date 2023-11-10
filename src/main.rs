@@ -58,8 +58,8 @@ impl Emulator {
     }
 
     fn write(&mut self, addr: usize, value: u16) {
-        if addr == 65510 {
-            println!("{}", value);
+        if addr == 0xfff0 {
+            println!("{}", value.wrapping_neg());
             self.halt = true;
         } else {
             self.rom[addr] = (value & 0xff) as u8;
@@ -70,7 +70,7 @@ impl Emulator {
 }
 
 fn main() {
-    let mut file = File::open("./bincode.bin").unwrap();
+    let mut file = File::open("./hej.bin").unwrap();
     let mut reader = BufReader::new(file);
     let mut emulator = Emulator::new();
     let mut buf = vec![0; 0];
