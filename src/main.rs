@@ -6,6 +6,7 @@ use std::{
 struct Emulator {
     rom: [u8; 65536],
     pc: u16,
+    halt: bool,
 }
 
 impl Emulator {
@@ -13,16 +14,32 @@ impl Emulator {
         Emulator {
             rom: [0; 65536],
             pc: 0,
+            halt: false,
         }
     }
-    fn add(&mut self, a: usize, b: usize) {
-        self.suble(a, 65500, self.pc);
-        self.suble(65500, b, self.pc);
-        self.suble(65500, 65500, self.pc);
+    fn main(&mut self) {
+        while !self.halt {
+            println!("{}", self.pc);
+            let mut a: u16 = self.read(self.pc as usize);
+            let mut b: u16 = self.read(self.pc as usize + 2);
+            let mut c: u16 = self.read(self.pc as usize + 4);
+            self.pc += 6;
+            self.suble(a as usize, b as usize, c);
+        }
     }
-    fn jump(&mut self, addr: u16) {
-        self.suble(65501, 65501, addr);
-    }
+    // fn copy(&mut self, src: usize, dest: usize) {
+    //     self.suble(dest, dest, self.pc);
+    //     self.add(src, dest);
+    // }
+    // fn add(&mut self, a: usize, b: usize) {
+    //     /// Not for use
+    //     self.suble(a, 65500, self.pc);
+    //     self.suble(65500, b, self.pc);
+    //     self.suble(65500, 65500, self.pc);
+    // }
+    // fn jump(&mut self, addr: u16) {
+    //     self.suble(65501, 65501, addr);
+    // }
 
     fn suble(&mut self, a: usize, b: usize, c: u16) {
         let mut mem_a: u16 = self.read(a);
@@ -31,6 +48,8 @@ impl Emulator {
         self.write(b, mem_b);
         if mem_b <= 0 {
             self.pc = c;
+        } else {
+            self.pc += 6;
         }
     }
     fn read(&mut self, addr: usize) -> u16 {
@@ -38,14 +57,14 @@ impl Emulator {
         return mem;
     }
 
-    fn write(&mut self, addr: usize, value: u16) -> bool {
-        if addr == 4 {
+    fn write(&mut self, addr: usize, value: u16) {
+        if addr == 65510 {
             println!("{}", value);
-            false
+            self.halt = true;
         } else {
             self.rom[addr] = (value & 0xff) as u8;
             self.rom[addr + 1] = (value >> 8) as u8;
-            true
+            self.halt = false;
         }
     }
 }
@@ -62,14 +81,8 @@ fn main() {
     for i in 0..10 {
         println!("{}", emulator.rom[i]);
     }
-    let mut cond = true;
-    while cond {
-        emulator.add(emulator.pc as usize, emulator.pc as usize + 2);
-        emulator.pc += 4;
-        let val = emulator.read(2);
-        cond = emulator.write(emulator.pc as usize, val);
-    }
-
+    println!("");
+    emulator.main();
     // let a: u16 = rom[pc] | rom[pc + 1] << 8;
     // rom[pc + 3] = a & 0xff;
     // rom[pc + 4] = (a >> 8) & 0xff;
