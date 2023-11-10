@@ -78,10 +78,6 @@ fn main() {
     for i in 0..buf.len() {
         emulator.rom[i] = buf[i];
     }
-    for i in 0..10 {
-        println!("{}", emulator.rom[i]);
-    }
-    println!("");
     emulator.main();
     // let a: u16 = rom[pc] | rom[pc + 1] << 8;
     // rom[pc + 3] = a & 0xff;
